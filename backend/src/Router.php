@@ -30,10 +30,18 @@ class Router
         
         // 认证路由
         $this->addRoute('POST', '/auth/login', 'AuthController', 'login');
+        $this->addRoute('POST', '/auth/student/login', 'AuthController', 'studentLogin');
         $this->addRoute('POST', '/auth/register', 'AuthController', 'register');
         $this->addRoute('GET', '/auth/profile', 'AuthController', 'profile', true);
         $this->addRoute('PUT', '/auth/profile', 'AuthController', 'updateProfile', true);
         $this->addRoute('PUT', '/auth/password', 'AuthController', 'changePassword', true);
+        
+        // 学生端路由
+        $this->addRoute('GET', '/student/profile', 'StudentPortalController', 'profile', true);
+        $this->addRoute('GET', '/student/overview', 'StudentPortalController', 'overview', true);
+        $this->addRoute('GET', '/student/courses', 'StudentPortalController', 'courses', true);
+        $this->addRoute('GET', '/student/courses/{courseId}', 'StudentPortalController', 'courseDetail', true);
+        $this->addRoute('GET', '/student/trend', 'StudentPortalController', 'trend', true);
         
         // 用户管理路由
         $this->addRoute('GET', '/users', 'UserController', 'index', true);
@@ -90,19 +98,6 @@ class Router
         $this->addRoute('GET', '/statistics/ranking', 'StatisticsController', 'ranking', true);
         $this->addRoute('GET', '/statistics/distribution', 'StatisticsController', 'distribution', true);
         $this->addRoute('GET', '/statistics/trend', 'StatisticsController', 'trend', true);
-        
-        // 课程表管理路由
-        $this->addRoute('GET', '/schedules', 'ScheduleController', 'index', true);
-        $this->addRoute('GET', '/schedules/options', 'ScheduleController', 'options', true);
-        $this->addRoute('GET', '/schedules/{id}', 'ScheduleController', 'show', true);
-        $this->addRoute('POST', '/schedules', 'ScheduleController', 'store', true);
-        $this->addRoute('PUT', '/schedules/{id}', 'ScheduleController', 'update', true);
-        $this->addRoute('DELETE', '/schedules/{id}', 'ScheduleController', 'destroy', true);
-        $this->addRoute('POST', '/schedules/{id}/items', 'ScheduleController', 'addItem', true);
-        $this->addRoute('PUT', '/schedules/{id}/items/{itemId}', 'ScheduleController', 'updateItem', true);
-        $this->addRoute('DELETE', '/schedules/{id}/items/{itemId}', 'ScheduleController', 'deleteItem', true);
-        $this->addRoute('PUT', '/schedules/{id}/items/{itemId}/move', 'ScheduleController', 'moveItem', true);
-        $this->addRoute('GET', '/schedules/{id}/check-conflict', 'ScheduleController', 'checkConflict', true);
     }
     
     /**

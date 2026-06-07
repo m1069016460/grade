@@ -8,6 +8,7 @@ namespace App\Controllers;
 use Firebase\JWT\JWT;
 use App\Config\App;
 use App\Models\User;
+use App\Models\Student;
 use App\Utils\Response;
 use App\Utils\Validator;
 use App\Utils\Logger;
@@ -15,10 +16,12 @@ use App\Utils\Logger;
 class AuthController
 {
     private User $userModel;
+    private Student $studentModel;
     
     public function __construct()
     {
         $this->userModel = new User();
+        $this->studentModel = new Student();
     }
     
     /**
@@ -238,6 +241,79 @@ class AuthController
             'id' => $user['id'],
             'username' => $user['username'],
             'role' => $user['role'],
+            'iat' => time(),
+            'exp' => time() + App::JWT_EXPIRY
+        ];
+        
+        return JWT::encode($payload, App::getJwtSecret(), 'HS256');
+    }
+    
+    /**
+     * 学生登录
+     */
+    public function studentLogin(): void
+    {
+        $data = $this->getInput();
+        
+        // 验证输入
+        $validator = new Validator($data);
+        $validator->required('studentNo', '学号不能为空')
+                  ->required('password', '密码不能为空');
+        
+        if ($validator->fails()) {
+            Response::error($validator->getFirstError(), 400);
+            return;
+        }
+        
+        // 查找学生
+        $student = $this->studentModel->findByStudentNo($data['studentNo']);
+        
+        if (!$student) {
+            Response::error('学号或密码错误', 401);
+            return;
+        }
+        
+        // 验证密码
+        if (!password_verify($data['password'], $student['password'])) {
+            Response::error('学号或密码错误', 401);
+            return;
+        }
+        
+        // 检查学生状态
+        if ($student['status'] != 1) {
+            Response::error('账户已被禁用', 403);
+            return;
+        }
+        
+        // 生成Token
+        $token = $this->generateStudentToken($student);
+        
+        Logger::info("Student logged in: {$student['student_no']}");
+        
+        Response::success([
+            'token' => $token,
+            'student' => [
+                'id' => $student['id'],
+                'studentNo' => $student['student_no'],
+                'name' => $student['name'],
+                'gender' => $student['gender'],
+                'classId' => $student['class_id'],
+                'email' => $student['email'],
+                'phone' => $student['phone'],
+                'role' => 'student'
+            ]
+        ], '登录成功');
+    }
+    
+    /**
+     * 生成学生JWT Token
+     */
+    private function generateStudentToken(array $student): string
+    {
+        $payload = [
+            'id' => $student['id'],
+            'studentNo' => $student['student_no'],
+            'role' => 'student',
             'iat' => time(),
             'exp' => time() + App::JWT_EXPIRY
         ];

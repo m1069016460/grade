@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useStudentStore } from '@/stores/student'
 
 const routes = [
   {
@@ -50,18 +51,6 @@ const routes = [
         meta: { title: '成绩管理' }
       },
       {
-        path: 'schedules',
-        name: 'Schedules',
-        component: () => import('@/views/Schedules.vue'),
-        meta: { title: '课程表管理' }
-      },
-      {
-        path: 'schedules/:id',
-        name: 'ScheduleDetail',
-        component: () => import('@/views/ScheduleDetail.vue'),
-        meta: { title: '课程表详情' }
-      },
-      {
         path: 'statistics',
         name: 'Statistics',
         component: () => import('@/views/Statistics.vue'),
@@ -78,6 +67,37 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/Profile.vue'),
         meta: { title: '个人中心' }
+      }
+    ]
+  },
+  {
+    path: '/student/login',
+    name: 'StudentLogin',
+    component: () => import('@/views/student/StudentLogin.vue'),
+    meta: { title: '学生登录', requiresStudentAuth: false }
+  },
+  {
+    path: '/student',
+    component: () => import('@/layouts/StudentLayout.vue'),
+    meta: { requiresStudentAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'StudentDashboard',
+        component: () => import('@/views/student/StudentDashboard.vue'),
+        meta: { title: '成绩总览' }
+      },
+      {
+        path: 'courses',
+        name: 'StudentCourses',
+        component: () => import('@/views/student/StudentCourses.vue'),
+        meta: { title: '课程成绩' }
+      },
+      {
+        path: 'profile',
+        name: 'StudentProfile',
+        component: () => import('@/views/student/StudentProfile.vue'),
+        meta: { title: '个人信息' }
       }
     ]
   },
@@ -99,22 +119,39 @@ router.beforeEach((to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - 学生成绩管理系统` : '学生成绩管理系统'
   
   const userStore = useUserStore()
-  const isLoggedIn = userStore.isLoggedIn
+  const studentStore = useStudentStore()
+  
+  const isUserLoggedIn = userStore.isLoggedIn
+  const isStudentLoggedIn = studentStore.isLoggedIn
   const isAdmin = userStore.isAdmin
   
-  if (to.meta.requiresAuth && !isLoggedIn) {
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-    return
-  }
+  const isStudentPath = to.path.startsWith('/student')
   
-  if (to.meta.requiresAdmin && !isAdmin) {
-    next({ name: 'Dashboard' })
-    return
-  }
-  
-  if ((to.name === 'Login' || to.name === 'Register') && isLoggedIn) {
-    next({ name: 'Dashboard' })
-    return
+  if (isStudentPath) {
+    if (to.meta.requiresStudentAuth && !isStudentLoggedIn) {
+      next({ name: 'StudentLogin', query: { redirect: to.fullPath } })
+      return
+    }
+    
+    if (to.name === 'StudentLogin' && isStudentLoggedIn) {
+      next({ name: 'StudentDashboard' })
+      return
+    }
+  } else {
+    if (to.meta.requiresAuth && !isUserLoggedIn) {
+      next({ name: 'Login', query: { redirect: to.fullPath } })
+      return
+    }
+    
+    if (to.meta.requiresAdmin && !isAdmin) {
+      next({ name: 'Dashboard' })
+      return
+    }
+    
+    if ((to.name === 'Login' || to.name === 'Register') && isUserLoggedIn) {
+      next({ name: 'Dashboard' })
+      return
+    }
   }
   
   next()

@@ -27,9 +27,17 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const userToken = localStorage.getItem('token')
+    const studentToken = localStorage.getItem('studentToken')
+    
+    if (config.url?.startsWith('/student/') || config.url?.startsWith('/auth/student/') {
+      if (studentToken) {
+        config.headers.Authorization = `Bearer ${studentToken}`
+      }
+    } else {
+      if (userToken) {
+        config.headers.Authorization = `Bearer ${userToken}`
+      }
     }
     return config
   },
@@ -74,9 +82,16 @@ request.interceptors.response.use(
           }
           // 只有当不在登录页时才跳转
           if (!window.location.pathname.includes('/login')) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
-            router.push('/login')
+            const isStudentPath = window.location.pathname.startsWith('/student')
+            if (isStudentPath) {
+              localStorage.removeItem('studentToken')
+              localStorage.removeItem('student')
+              router.push('/student/login')
+            } else {
+              localStorage.removeItem('token')
+              localStorage.removeItem('user')
+              router.push('/login')
+            }
           }
           break
         case 403:

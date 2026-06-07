@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `students` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `student_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '学号',
     `name` VARCHAR(50) NOT NULL COMMENT '姓名',
+    `password` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '密码',
     `gender` ENUM('男', '女') DEFAULT '男' COMMENT '性别',
     `birth_date` DATE NULL COMMENT '出生日期',
     `class_id` INT UNSIGNED NULL COMMENT '班级ID',
@@ -97,50 +98,6 @@ CREATE TABLE IF NOT EXISTS `grades` (
     FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='成绩表';
 
--- 课程表主表
-CREATE TABLE IF NOT EXISTS `schedule_timetables` (
-    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(100) NOT NULL COMMENT '课程表名称',
-    `week_start` DATE NOT NULL COMMENT '周开始日期',
-    `week_end` DATE NOT NULL COMMENT '周结束日期',
-    `semester` VARCHAR(50) NULL COMMENT '学期',
-    `teacher_id` INT UNSIGNED NOT NULL COMMENT '创建教师ID',
-    `description` TEXT NULL COMMENT '备注',
-    `status` TINYINT DEFAULT 1 COMMENT '状态：1正常 0停用',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX `idx_teacher` (`teacher_id`),
-    INDEX `idx_semester` (`semester`),
-    INDEX `idx_week` (`week_start`, `week_end`),
-    FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程表主表';
-
--- 课程表详情表
-CREATE TABLE IF NOT EXISTS `schedule_items` (
-    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `timetable_id` INT UNSIGNED NOT NULL COMMENT '课程表ID',
-    `course_name` VARCHAR(100) NOT NULL COMMENT '课程名称',
-    `class_id` INT UNSIGNED NULL COMMENT '授课班级ID',
-    `class_name` VARCHAR(100) NULL COMMENT '班级名称（冗余）',
-    `day_of_week` TINYINT NOT NULL COMMENT '星期几：1-7 代表周一到周日',
-    `start_slot` TINYINT NOT NULL COMMENT '开始节次',
-    `end_slot` TINYINT NOT NULL COMMENT '结束节次',
-    `start_time` TIME NULL COMMENT '开始时间',
-    `end_time` TIME NULL COMMENT '结束时间',
-    `location` VARCHAR(100) NULL COMMENT '授课地点',
-    `teacher_id` INT UNSIGNED NULL COMMENT '授课教师ID',
-    `teacher_name` VARCHAR(50) NULL COMMENT '教师姓名（冗余）',
-    `color` VARCHAR(20) DEFAULT '#409EFF' COMMENT '课程颜色',
-    `remark` TEXT NULL COMMENT '备注',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX `idx_timetable` (`timetable_id`),
-    INDEX `idx_day_slot` (`day_of_week`, `start_slot`, `end_slot`),
-    FOREIGN KEY (`timetable_id`) REFERENCES `schedule_timetables`(`id`) ON DELETE CASCADE,
-    FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON DELETE SET NULL,
-    FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程表明细表';
-
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ========================================
@@ -165,26 +122,26 @@ INSERT INTO `classes` (`name`, `grade`, `major`, `teacher_id`, `description`) VA
 ('计算机科学1班', '2023级', '计算机科学与技术', 2, '2023级计算机科学与技术专业1班'),
 ('软件工程1班', '2023级', '软件工程', 3, '2023级软件工程专业1班');
 
--- 学生数据
-INSERT INTO `students` (`student_no`, `name`, `gender`, `class_id`, `phone`, `email`) VALUES
-('2024001001', '张三', '男', 1, '13900000001', 'zhangsan@stu.edu.cn'),
-('2024001002', '李四', '男', 1, '13900000002', 'lisi@stu.edu.cn'),
-('2024001003', '王五', '女', 1, '13900000003', 'wangwu@stu.edu.cn'),
-('2024001004', '赵六', '男', 1, '13900000004', 'zhaoliu@stu.edu.cn'),
-('2024001005', '钱七', '女', 1, '13900000005', 'qianqi@stu.edu.cn'),
-('2024002001', '孙八', '男', 2, '13900000006', 'sunba@stu.edu.cn'),
-('2024002002', '周九', '女', 2, '13900000007', 'zhoujiu@stu.edu.cn'),
-('2024002003', '吴十', '男', 2, '13900000008', 'wushi@stu.edu.cn'),
-('2024003001', '郑一', '女', 3, '13900000009', 'zhengyi@stu.edu.cn'),
-('2024003002', '王二', '男', 3, '13900000010', 'wanger@stu.edu.cn'),
-('2024003003', '冯三', '女', 3, '13900000011', 'fengsan@stu.edu.cn'),
-('2024004001', '陈四', '男', 4, '13900000012', 'chensi@stu.edu.cn'),
-('2024004002', '褚五', '女', 4, '13900000013', 'chuwu@stu.edu.cn'),
-('2023001001', '卫六', '男', 5, '13900000014', 'weiliu@stu.edu.cn'),
-('2023001002', '蒋七', '女', 5, '13900000015', 'jiangqi@stu.edu.cn'),
-('2023002001', '沈八', '男', 6, '13900000016', 'shenba@stu.edu.cn'),
-('2023002002', '韩九', '女', 6, '13900000017', 'hanjiu@stu.edu.cn'),
-('2023002003', '杨十', '男', 6, '13900000018', 'yangshi@stu.edu.cn');
+-- 学生数据（默认密码: 123456）
+INSERT INTO `students` (`student_no`, `name`, `password`, `gender`, `class_id`, `phone`, `email`) VALUES
+('2024001001', '张三', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 1, '13900000001', 'zhangsan@stu.edu.cn'),
+('2024001002', '李四', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 1, '13900000002', 'lisi@stu.edu.cn'),
+('2024001003', '王五', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 1, '13900000003', 'wangwu@stu.edu.cn'),
+('2024001004', '赵六', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 1, '13900000004', 'zhaoliu@stu.edu.cn'),
+('2024001005', '钱七', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 1, '13900000005', 'qianqi@stu.edu.cn'),
+('2024002001', '孙八', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 2, '13900000006', 'sunba@stu.edu.cn'),
+('2024002002', '周九', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 2, '13900000007', 'zhoujiu@stu.edu.cn'),
+('2024002003', '吴十', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 2, '13900000008', 'wushi@stu.edu.cn'),
+('2024003001', '郑一', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 3, '13900000009', 'zhengyi@stu.edu.cn'),
+('2024003002', '王二', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 3, '13900000010', 'wanger@stu.edu.cn'),
+('2024003003', '冯三', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 3, '13900000011', 'fengsan@stu.edu.cn'),
+('2024004001', '陈四', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 4, '13900000012', 'chensi@stu.edu.cn'),
+('2024004002', '褚五', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 4, '13900000013', 'chuwu@stu.edu.cn'),
+('2023001001', '卫六', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 5, '13900000014', 'weiliu@stu.edu.cn'),
+('2023001002', '蒋七', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 5, '13900000015', 'jiangqi@stu.edu.cn'),
+('2023002001', '沈八', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 6, '13900000016', 'shenba@stu.edu.cn'),
+('2023002002', '韩九', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '女', 6, '13900000017', 'hanjiu@stu.edu.cn'),
+('2023002003', '杨十', '$2y$10$30i9B9aa59PZHXfNThtwDOmwszD4grv1aKD0lfQb11.JfyYGzjZ8q', '男', 6, '13900000018', 'yangshi@stu.edu.cn');
 
 -- 更新班级学生人数
 UPDATE `classes` SET `student_count` = (SELECT COUNT(*) FROM `students` WHERE `students`.`class_id` = `classes`.`id`);

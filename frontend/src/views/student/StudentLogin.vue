@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <div class="student-login-page">
     <div class="login-bg">
       <div class="shape shape-1"></div>
       <div class="shape shape-2"></div>
@@ -10,8 +10,8 @@
       <div class="login-card">
         <div class="login-header">
           <img src="/favicon.svg" alt="Logo" class="logo" />
-          <h1>学生成绩管理系统</h1>
-          <p>专业的学生成绩管理与统计分析平台</p>
+          <h1>学生成绩查询系统</h1>
+          <p>查看个人成绩与排名信息</p>
         </div>
         
         <el-form
@@ -21,10 +21,10 @@
           class="login-form"
           @keyup.enter="handleSubmit"
         >
-          <el-form-item prop="username">
+          <el-form-item prop="studentNo">
             <el-input
-              v-model="form.username"
-              placeholder="请输入用户名"
+              v-model="form.studentNo"
+              placeholder="请输入学号"
               size="large"
               :prefix-icon="User"
             />
@@ -55,25 +55,15 @@
         </el-form>
         
         <div class="login-footer">
-          还没有账号？
-          <router-link to="/register">立即注册</router-link>
-        </div>
-        <div class="student-entry">
-          <router-link to="/student/login">学生端登录入口 →</router-link>
+          <router-link to="/login">返回管理系统登录</router-link>
         </div>
       </div>
       
       <div class="demo-account">
         <el-divider>测试账号</el-divider>
-        <div class="accounts">
-          <div class="account" @click="fillDemo('admin', 'admin123')">
-            <el-tag type="danger">管理员</el-tag>
-            <span>admin / admin123</span>
-          </div>
-          <div class="account" @click="fillDemo('teacher', 'teacher123')">
-            <el-tag type="primary">教师</el-tag>
-            <span>teacher / teacher123</span>
-          </div>
+        <div class="account" @click="fillDemo('2024001001', '123456')">
+          <el-tag type="success">学生</el-tag>
+          <span>学号：2024001001 / 密码：123456</span>
         </div>
       </div>
     </div>
@@ -83,33 +73,33 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { useStudentStore } from '@/stores/student'
 import { showSuccess } from '@/utils/request'
 import { User, Lock } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
-const userStore = useUserStore()
+const studentStore = useStudentStore()
 
 const formRef = ref(null)
 const loading = ref(false)
 
 const form = reactive({
-  username: '',
+  studentNo: '',
   password: ''
 })
 
 const rules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+  studentNo: [
+    { required: true, message: '请输入学号', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
   ]
 }
 
-function fillDemo(username, password) {
-  form.username = username
+function fillDemo(studentNo, password) {
+  form.studentNo = studentNo
   form.password = password
 }
 
@@ -119,9 +109,9 @@ async function handleSubmit() {
   
   loading.value = true
   try {
-    await userStore.login(form)
+    await studentStore.login(form)
     showSuccess('登录成功')
-    const redirect = route.query.redirect || '/'
+    const redirect = route.query.redirect || '/student'
     router.push(redirect)
   } catch (error) {
     // 错误已在拦截器中处理
@@ -132,12 +122,12 @@ async function handleSubmit() {
 </script>
 
 <style lang="scss" scoped>
-.login-page {
+.student-login-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7ed 100%);
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   position: relative;
   overflow: hidden;
 }
@@ -155,7 +145,7 @@ async function handleSubmit() {
     &.shape-1 {
       width: 400px;
       height: 400px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: linear-gradient(135deg, #22c55e, #16a34a);
       top: -100px;
       left: -100px;
       animation: float 8s ease-in-out infinite;
@@ -164,7 +154,7 @@ async function handleSubmit() {
     &.shape-2 {
       width: 300px;
       height: 300px;
-      background: linear-gradient(135deg, #764ba2, #667eea);
+      background: linear-gradient(135deg, #16a34a, #22c55e);
       bottom: -50px;
       right: -50px;
       animation: float 6s ease-in-out infinite reverse;
@@ -173,9 +163,9 @@ async function handleSubmit() {
     &.shape-3 {
       width: 200px;
       height: 200px;
-      background: linear-gradient(135deg, #667eea, #5a6fd6);
+      background: linear-gradient(135deg, #22c55e, #4ade80);
       top: 50%;
-      right: 20%;
+      left: 20%;
       animation: float 7s ease-in-out infinite;
     }
   }
@@ -233,7 +223,7 @@ async function handleSubmit() {
       }
       
       &.is-focus {
-        box-shadow: 0 0 0 1px #667eea inset;
+        box-shadow: 0 0 0 1px #22c55e inset;
       }
     }
     
@@ -247,7 +237,7 @@ async function handleSubmit() {
     height: 48px;
     font-size: 16px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     border: none;
     
     &:hover {
@@ -261,22 +251,7 @@ async function handleSubmit() {
     font-size: 14px;
     
     a {
-      color: #667eea;
-      font-weight: 500;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-  
-  .student-entry {
-    text-align: center;
-    margin-top: 12px;
-    
-    a {
       color: #22c55e;
-      font-size: 14px;
       font-weight: 500;
       
       &:hover {
@@ -298,24 +273,18 @@ async function handleSubmit() {
     font-size: 12px;
   }
   
-  .accounts {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
   .account {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 12px;
-    background: #f5f7fa;
+    padding: 10px 12px;
+    background: #f0fdf4;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
     
     &:hover {
-      background: #e6e8eb;
+      background: #dcfce7;
     }
     
     span {

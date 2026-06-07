@@ -1,10 +1,10 @@
 <template>
-  <div class="main-layout">
+  <div class="student-layout">
     <!-- 侧边栏 -->
     <aside class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="logo">
         <img src="/favicon.svg" alt="Logo" />
-        <span v-show="!isCollapsed">成绩管理系统</span>
+        <span v-show="!isCollapsed">学生成绩查询</span>
       </div>
       
       <el-menu
@@ -15,39 +15,19 @@
         text-color="#ffffff"
         active-text-color="#ffffff"
       >
-        <el-menu-item index="/">
+        <el-menu-item index="/student">
           <el-icon><DataAnalysis /></el-icon>
-          <template #title>仪表盘</template>
+          <template #title>成绩总览</template>
         </el-menu-item>
         
-        <el-menu-item index="/students">
-          <el-icon><User /></el-icon>
-          <template #title>学生管理</template>
-        </el-menu-item>
-        
-        <el-menu-item index="/classes">
-          <el-icon><School /></el-icon>
-          <template #title>班级管理</template>
-        </el-menu-item>
-        
-        <el-menu-item index="/courses">
+        <el-menu-item index="/student/courses">
           <el-icon><Reading /></el-icon>
-          <template #title>课程管理</template>
+          <template #title>课程成绩</template>
         </el-menu-item>
         
-        <el-menu-item index="/grades">
-          <el-icon><Notebook /></el-icon>
-          <template #title>成绩管理</template>
-        </el-menu-item>
-        
-        <el-menu-item index="/statistics">
-          <el-icon><TrendCharts /></el-icon>
-          <template #title>统计分析</template>
-        </el-menu-item>
-        
-        <el-menu-item v-if="userStore.isAdmin" index="/users">
-          <el-icon><UserFilled /></el-icon>
-          <template #title>用户管理</template>
+        <el-menu-item index="/student/profile">
+          <el-icon><User /></el-icon>
+          <template #title>个人信息</template>
         </el-menu-item>
       </el-menu>
     </aside>
@@ -59,7 +39,7 @@
         <div class="header-left">
           <el-icon class="toggle-btn" @click="toggleSidebar"><Fold v-if="!isCollapsed" /><Expand v-else /></el-icon>
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/student' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item v-if="currentTitle">{{ currentTitle }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
@@ -68,15 +48,15 @@
           <el-dropdown trigger="click" @command="handleCommand">
             <div class="user-info">
               <el-avatar :size="36" class="avatar">
-                {{ userStore.user?.realName?.charAt(0) || userStore.user?.username?.charAt(0) || 'U' }}
+                {{ studentStore.student?.name?.charAt(0) || 'S' }}
               </el-avatar>
-              <span class="username">{{ userStore.user?.realName || userStore.user?.username }}</span>
+              <span class="username">{{ studentStore.student?.name }}</span>
               <el-icon><ArrowDown /></el-icon>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">
-                  <el-icon><User /></el-icon>个人中心
+                  <el-icon><User /></el-icon>个人信息
                 </el-dropdown-item>
                 <el-dropdown-item divided command="logout">
                   <el-icon><SwitchButton /></el-icon>退出登录
@@ -102,12 +82,12 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { useStudentStore } from '@/stores/student'
 import { ElMessageBox } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
-const userStore = useUserStore()
+const studentStore = useStudentStore()
 
 const isCollapsed = ref(false)
 
@@ -120,21 +100,21 @@ function toggleSidebar() {
 
 function handleCommand(command) {
   if (command === 'profile') {
-    router.push('/profile')
+    router.push('/student/profile')
   } else if (command === 'logout') {
     ElMessageBox.confirm('确定要退出登录吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     }).then(() => {
-      userStore.logout()
+      studentStore.logout()
     }).catch(() => {})
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.main-layout {
+.student-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
@@ -142,7 +122,7 @@ function handleCommand(command) {
 
 .sidebar {
   width: 240px;
-  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
@@ -203,7 +183,7 @@ function handleCommand(command) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #f0f2f5;
+  background: #f0fdf4;
 }
 
 .header {
@@ -228,7 +208,7 @@ function handleCommand(command) {
       transition: color 0.3s;
       
       &:hover {
-        color: #667eea;
+        color: #22c55e;
       }
     }
   }
@@ -251,7 +231,7 @@ function handleCommand(command) {
       }
       
       .avatar {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #22c55e, #16a34a);
         color: #fff;
       }
       
