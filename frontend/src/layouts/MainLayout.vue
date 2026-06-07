@@ -40,6 +40,11 @@
           <template #title>成绩管理</template>
         </el-menu-item>
         
+        <el-menu-item index="/schedules">
+          <el-icon><Calendar /></el-icon>
+          <template #title>课程表管理</template>
+        </el-menu-item>
+        
         <el-menu-item index="/statistics">
           <el-icon><TrendCharts /></el-icon>
           <template #title>统计分析</template>

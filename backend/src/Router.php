@@ -90,6 +90,19 @@ class Router
         $this->addRoute('GET', '/statistics/ranking', 'StatisticsController', 'ranking', true);
         $this->addRoute('GET', '/statistics/distribution', 'StatisticsController', 'distribution', true);
         $this->addRoute('GET', '/statistics/trend', 'StatisticsController', 'trend', true);
+        
+        // 课程表管理路由
+        $this->addRoute('GET', '/schedules', 'ScheduleController', 'index', true);
+        $this->addRoute('GET', '/schedules/options', 'ScheduleController', 'options', true);
+        $this->addRoute('GET', '/schedules/{id}', 'ScheduleController', 'show', true);
+        $this->addRoute('POST', '/schedules', 'ScheduleController', 'store', true);
+        $this->addRoute('PUT', '/schedules/{id}', 'ScheduleController', 'update', true);
+        $this->addRoute('DELETE', '/schedules/{id}', 'ScheduleController', 'destroy', true);
+        $this->addRoute('POST', '/schedules/{id}/items', 'ScheduleController', 'addItem', true);
+        $this->addRoute('PUT', '/schedules/{id}/items/{itemId}', 'ScheduleController', 'updateItem', true);
+        $this->addRoute('DELETE', '/schedules/{id}/items/{itemId}', 'ScheduleController', 'deleteItem', true);
+        $this->addRoute('PUT', '/schedules/{id}/items/{itemId}/move', 'ScheduleController', 'moveItem', true);
+        $this->addRoute('GET', '/schedules/{id}/check-conflict', 'ScheduleController', 'checkConflict', true);
     }
     
     /**

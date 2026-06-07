@@ -97,6 +97,50 @@ CREATE TABLE IF NOT EXISTS `grades` (
     FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='成绩表';
 
+-- 课程表主表
+CREATE TABLE IF NOT EXISTS `schedule_timetables` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(100) NOT NULL COMMENT '课程表名称',
+    `week_start` DATE NOT NULL COMMENT '周开始日期',
+    `week_end` DATE NOT NULL COMMENT '周结束日期',
+    `semester` VARCHAR(50) NULL COMMENT '学期',
+    `teacher_id` INT UNSIGNED NOT NULL COMMENT '创建教师ID',
+    `description` TEXT NULL COMMENT '备注',
+    `status` TINYINT DEFAULT 1 COMMENT '状态：1正常 0停用',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_teacher` (`teacher_id`),
+    INDEX `idx_semester` (`semester`),
+    INDEX `idx_week` (`week_start`, `week_end`),
+    FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程表主表';
+
+-- 课程表详情表
+CREATE TABLE IF NOT EXISTS `schedule_items` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `timetable_id` INT UNSIGNED NOT NULL COMMENT '课程表ID',
+    `course_name` VARCHAR(100) NOT NULL COMMENT '课程名称',
+    `class_id` INT UNSIGNED NULL COMMENT '授课班级ID',
+    `class_name` VARCHAR(100) NULL COMMENT '班级名称（冗余）',
+    `day_of_week` TINYINT NOT NULL COMMENT '星期几：1-7 代表周一到周日',
+    `start_slot` TINYINT NOT NULL COMMENT '开始节次',
+    `end_slot` TINYINT NOT NULL COMMENT '结束节次',
+    `start_time` TIME NULL COMMENT '开始时间',
+    `end_time` TIME NULL COMMENT '结束时间',
+    `location` VARCHAR(100) NULL COMMENT '授课地点',
+    `teacher_id` INT UNSIGNED NULL COMMENT '授课教师ID',
+    `teacher_name` VARCHAR(50) NULL COMMENT '教师姓名（冗余）',
+    `color` VARCHAR(20) DEFAULT '#409EFF' COMMENT '课程颜色',
+    `remark` TEXT NULL COMMENT '备注',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_timetable` (`timetable_id`),
+    INDEX `idx_day_slot` (`day_of_week`, `start_slot`, `end_slot`),
+    FOREIGN KEY (`timetable_id`) REFERENCES `schedule_timetables`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程表明细表';
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ========================================

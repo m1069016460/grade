@@ -50,6 +50,18 @@ const routes = [
         meta: { title: '成绩管理' }
       },
       {
+        path: 'schedules',
+        name: 'Schedules',
+        component: () => import('@/views/Schedules.vue'),
+        meta: { title: '课程表管理' }
+      },
+      {
+        path: 'schedules/:id',
+        name: 'ScheduleDetail',
+        component: () => import('@/views/ScheduleDetail.vue'),
+        meta: { title: '课程表详情' }
+      },
+      {
         path: 'statistics',
         name: 'Statistics',
         component: () => import('@/views/Statistics.vue'),
